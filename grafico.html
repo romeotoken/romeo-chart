@@ -1,57 +1,86 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>Romeo Token Chart</title>
+<head>
+  <meta charset="UTF-8" />
+  <title>Romeo Token Chart</title>
 
-    <style>
-      html, body {
-        margin: 0;
-        padding: 0;
-        height: 100%;
-        background: #000; /* sfondo nero */
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #000;
+    }
+    #chart {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+
+  <!-- TradingView Lightweight Charts -->
+  <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+</head>
+
+<body>
+  <div id="chart"></div>
+
+  <script>
+    // TOKEN ADDRESS ROMEO
+    const TOKEN = "CHwssnZnBZ47sXE88GvTSBXKoF7ZfERRkcnUM7B3pump";
+
+    // Birdeye API endpoint (public)
+    const API = `https://public-api.birdeye.so/defi/ohlcv?address=${TOKEN}&type=1D`;
+
+    async function loadChart() {
+      const response = await fetch(API, {
+        headers: { "x-chain": "solana" }
+      });
+
+      const data = await response.json();
+
+      if (!data.data || !data.data.items) {
+        console.error("Nessun dato ricevuto");
+        return;
       }
 
-      #price-chart-widget-container {
-        width: 100%;
-        height: 100%;
-      }
-    </style>
-  </head>
+      const ohlc = data.data.items.map(c => ({
+        time: c.time,
+        open: c.open,
+        high: c.high,
+        low: c.low,
+        close: c.close
+      }));
 
-  <body>
-
-    <!-- Contenitore del grafico -->
-    <div id="price-chart-widget-container"></div>
-
-    <!-- Carica il widget Moralis PRIMA -->
-    <script src="https://moralis.com/static/embed/chart.js"></script>
-
-    <script>
-      function loadWidget() {
-        if (typeof window.createMyWidget === 'function') {
-          window.createMyWidget('price-chart-widget-container', {
-            autoSize: true,
-            chainId: 'solana',
-            tokenAddress: 'CHwssnZnBZ47sXE88GvTSBXKoF7ZfERRkcnUM7B3pump',
-            showHoldersChart: true,
-            defaultInterval: '1D',
-            timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone ?? 'Etc/UTC',
-            theme: 'moralis',
-            locale: 'en',
-            showCurrencyToggle: true,
-            hideLeftToolbar: false,
-            hideTopToolbar: false,
-            hideBottomToolbar: false
-          });
-        } else {
-          console.error("Widget non caricato");
+      const chart = LightweightCharts.createChart(document.getElementById("chart"), {
+        layout: {
+          background: { color: "#000" },
+          textColor: "#fff"
+        },
+        grid: {
+          vertLines: { color: "#222" },
+          horzLines: { color: "#222" }
+        },
+        timeScale: {
+          borderColor: "#444"
+        },
+        rightPriceScale: {
+          borderColor: "#444"
         }
-      }
+      });
 
-      // Aspetta che il file chart.js sia caricato
-      window.addEventListener('load', loadWidget);
-    </script>
+      const candleSeries = chart.addCandlestickSeries({
+        upColor: "#26a69a",
+        downColor: "#ef5350",
+        borderVisible: false,
+        wickUpColor: "#26a69a",
+        wickDownColor: "#ef5350"
+      });
 
-  </body>
+      candleSeries.setData(ohlc);
+    }
+
+    loadChart();
+  </script>
+
+</body>
 </html>
