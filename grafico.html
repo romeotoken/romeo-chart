@@ -25,62 +25,20 @@
   <div id="chart"></div>
 
   <script>
-    // TOKEN ADDRESS ROMEO
+    // Romeo Token address
     const TOKEN = "CHwssnZnBZ47sXE88GvTSBXKoF7ZfERRkcnUM7B3pump";
 
-    // Birdeye API endpoint (public)
-    const API = `https://public-api.birdeye.so/defi/ohlcv?address=${TOKEN}&type=1D`;
+    // Jupiter OHLC API (public, no key needed)
+    const API = `https://price.jup.ag/v4/price/ohlc?ids=${TOKEN}&interval=1D`;
 
     async function loadChart() {
-      const response = await fetch(API, {
-        headers: { "x-chain": "solana" }
-      });
+      try {
+        const response = await fetch(API);
+        const data = await response.json();
 
-      const data = await response.json();
-
-      if (!data.data || !data.data.items) {
-        console.error("Nessun dato ricevuto");
-        return;
-      }
-
-      const ohlc = data.data.items.map(c => ({
-        time: c.time,
-        open: c.open,
-        high: c.high,
-        low: c.low,
-        close: c.close
-      }));
-
-      const chart = LightweightCharts.createChart(document.getElementById("chart"), {
-        layout: {
-          background: { color: "#000" },
-          textColor: "#fff"
-        },
-        grid: {
-          vertLines: { color: "#222" },
-          horzLines: { color: "#222" }
-        },
-        timeScale: {
-          borderColor: "#444"
-        },
-        rightPriceScale: {
-          borderColor: "#444"
+        if (!data.data || !data.data[TOKEN] || !data.data[TOKEN].ohlc) {
+          console.error("Nessun dato OHLC ricevuto");
+          return;
         }
-      });
 
-      const candleSeries = chart.addCandlestickSeries({
-        upColor: "#26a69a",
-        downColor: "#ef5350",
-        borderVisible: false,
-        wickUpColor: "#26a69a",
-        wickDownColor: "#ef5350"
-      });
-
-      candleSeries.setData(ohlc);
-    }
-
-    loadChart();
-  </script>
-
-</body>
-</html>
+        const ohlc = data.data[TOKEN].ohlc.map(c => ({
