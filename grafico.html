@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Romeo Token Chart</title>
+
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        background: #000; /* sfondo nero */
+      }
+
+      #price-chart-widget-container {
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </head>
+
+  <body>
+
+    <!-- Contenitore del grafico -->
+    <div id="price-chart-widget-container"></div>
+
+    <!-- Carica il widget Moralis PRIMA -->
+    <script src="https://moralis.com/static/embed/chart.js"></script>
+
+    <script>
+      function loadWidget() {
+        if (typeof window.createMyWidget === 'function') {
+          window.createMyWidget('price-chart-widget-container', {
+            autoSize: true,
+            chainId: 'solana',
+            tokenAddress: 'CHwssnZnBZ47sXE88GvTSBXKoF7ZfERRkcnUM7B3pump',
+            showHoldersChart: true,
+            defaultInterval: '1D',
+            timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone ?? 'Etc/UTC',
+            theme: 'moralis',
+            locale: 'en',
+            showCurrencyToggle: true,
+            hideLeftToolbar: false,
+            hideTopToolbar: false,
+            hideBottomToolbar: false
+          });
+        } else {
+          console.error("Widget non caricato");
+        }
+      }
+
